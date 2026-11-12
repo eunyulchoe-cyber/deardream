@@ -144,7 +144,7 @@
     return "서버에 연결되지 않아";
   }
 
-  /* 로딩 화면은 절대 멈춰 있지 않는다: 5초 뒤 '기기에서 바로 보기', 요청 시간 제한(12초) 뒤 자동 전환 */
+  /* 로딩 화면은 절대 멈춰 있지 않는다: 5초 뒤 '기기에서 바로 보기', 요청 시간 제한(15초) 뒤 자동 전환 */
   let loadingCancel = null;
   function startLoading() {
     show("loading");
@@ -162,7 +162,7 @@
       out = await Promise.race([
         DDAPI.interpret(raw, { force }),
         L.cancelP.then(() => { throw Object.assign(new Error("cancel"), { code: "cancel" }); }),
-        new Promise((_, rej) => { wd = setTimeout(() => rej(Object.assign(new Error("watchdog"), { code: "timeout" })), 15000); }) // 최후의 안전장치
+        new Promise((_, rej) => { wd = setTimeout(() => rej(Object.assign(new Error("watchdog"), { code: "timeout" })), 18000); }) // 최후의 안전장치
       ]);
     } catch (e) { error = e; }
     finally { L.done(); clearTimeout(wd); }
@@ -176,7 +176,7 @@
     if (raw.length < 4) { errEl.textContent = "조금만 더 적어 주세요."; errEl.hidden = false; return; }
     const entry = { id: uid(), createdAt: new Date().toISOString(), raw, scenes: [], reading: null, images: null, mode: null, pending: false };
     const { out, error } = await interpretOrOffline(raw, false);
-    if (out) Object.assign(entry, { scenes: out.scenes, reading: out.reading, mode: out.mode, model: out.model });
+    if (out) Object.assign(entry, { scenes: out.scenes, reading: out.reading, mode: out.mode, model: out.model, character: out.character || "" });
     else Object.assign(entry, offlineCompose(raw), { mode: "offline", pending: true, error: `${offlineReason(error)} 기기에서 장면만 나눴습니다.` });
     try { await DDDB.put(entry); } catch { toast("기기에 저장하지 못했습니다."); }
     $("#draft-note").value = ""; updateCount();
@@ -189,8 +189,8 @@
     $("#result-date").textContent = fmt(e.createdAt);
     const offline = e.pending || e.mode === "offline";
     const pill = $("#result-mode");
-    pill.hidden = e.mode !== "mock" && !offline;
-    pill.textContent = offline ? "오프라인 · 간단 읽기" : "모의 응답";
+    pill.hidden = e.mode !== "mock" && e.mode !== "fallback" && !offline;
+    pill.textContent = offline ? "오프라인 · 간단 읽기" : e.mode === "fallback" ? "간단 읽기" : "모의 응답";
     pill.classList.toggle("offline", offline);
     // 예전(0.1.1) 대기 기록은 읽기가 없을 수 있다
     const r = e.reading || (offline ? offlineCompose(e.raw).reading : null);
@@ -223,7 +223,7 @@
   async function retryPending(e) {
     const { out, error } = await interpretOrOffline(e.raw, true);
     if (out) {
-      Object.assign(e, { scenes: out.scenes, reading: out.reading, mode: out.mode, model: out.model, pending: false, error: null });
+      Object.assign(e, { scenes: out.scenes, reading: out.reading, mode: out.mode, model: out.model, character: out.character || "", pending: false, error: null });
       try { await DDDB.put(e); } catch {}
       toast("AI 읽기를 받았습니다.");
     } else {
@@ -245,7 +245,8 @@
       if (!ok) { toast("광고를 끝까지 보면 그림이 열립니다."); return; }
       btn.textContent = "그리는 중…";
       const prompts = current.scenes.map((s) => ({ title: s.title, body: s.body, image_prompt: s.image_prompt || "" }));
-      const out = await DDAPI.images(prompts, character);
+      // 반복 인물을 비워 두면 AI가 원문에서 뽑은 겉모습 설명(영어)을 써서 3장이 같은 모습이 되게
+      const out = await DDAPI.images(prompts, character || current.character || "");
       current.images = out.images;
       current.imageMode = out.mode;
       await DDDB.put(current);

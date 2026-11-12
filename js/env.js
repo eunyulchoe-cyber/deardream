@@ -1,4 +1,4 @@
-/* 빌드별 설정. 기본(폰/배포 빌드)은 비어 있음 → 서버 없으면 기기 안 '간단 읽기'로 동작.
- * 에뮬레이터용 디버그 빌드만 app/ 의 `npm run build:debug:emu` 가 이 파일을 API_BASE=http://10.0.2.2:8787 로 덮어씀.
- * Worker를 배포하면 여기(또는 config.js)에 https://deardream-api.<계정>.workers.dev 를 넣는다. */
-window.DD_ENV = { API_BASE: "" };
+/* 빌드별 설정. 배포된 Worker 주소(키 없음, 공개 주소). 서버에 닿지 않으면 기기 안 '간단 읽기'로 동작.
+ * localhost에서 열면 config.js가 로컬 wrangler dev(8787)를 우선 사용 (?api= 로 덮어쓰기 가능).
+ * 안드로이드: app/ 의 copy-web 이 이 파일을 DD_API_BASE(기본 = 아래 주소)로 다시 씀. */
+window.DD_ENV = { API_BASE: "https://deardream-api.deardream.workers.dev" };

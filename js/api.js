@@ -3,7 +3,7 @@
  * - 모든 요청에 시간 제한. fetch 중단이 안 먹는 WebView에 대비해 별도 타이머로도 끊는다.
  * - 연결 실패가 나면 60초 동안 '서버 없음'으로 기억해서 다음 요청은 바로 실패(빠른 오프라인 전환) */
 (function () {
-  const T = { interpret: 12000, images: 60000, report: 8000, transcribe: 20000, health: 2500 };
+  const T = { interpret: 15000, images: 60000, report: 8000, transcribe: 20000, health: 2500 };
   let downUntil = 0;
   const base = () => (window.DD_CONFIG.API_BASE || "").trim();
   const err = (code, msg, status) => Object.assign(new Error(msg || code), { code, status });
