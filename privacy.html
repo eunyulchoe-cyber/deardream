@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#24212f" />
+  <title>개인정보처리방침 (초안) — DearDream</title>
+  <link rel="stylesheet" href="./css/app.css" />
+  <style>
+    .doc { background: var(--paper); color: var(--ink); border-radius: 18px; padding: 22px; }
+    .doc h1 { font-size: 22px; margin-top: 0; } .doc h2 { font-size: 16px; margin: 22px 0 6px; }
+    .doc table { width: 100%; border-collapse: collapse; font-size: 13px; } .doc td, .doc th { border: 1px solid #d7d0c6; padding: 6px; vertical-align: top; text-align: left; }
+    .draft { background: #d98b8b; color: #fff; border-radius: 10px; padding: 10px 12px; font-weight: 700; font-size: 13px; }
+    .doc .ph { background: #fff2b3; padding: 0 3px; }
+  </style>
+</head>
+<body>
+  <header class="top"><a class="brand" href="./index.html" style="text-decoration:none"><img src="./icons/icon-192.png" alt="" />DearDream</a><span>개인정보처리방침</span></header>
+  <article class="doc">
+    <p class="draft">초안(DRAFT) — 법률 검토 전 문서입니다. 출시 전 노란 칸을 채우고 전문가 확인을 받으세요.</p>
+    <h1>DearDream 개인정보처리방침</h1>
+    <p><span class="ph">[운영자 이름/상호]</span>(이하 "운영자")는 DearDream 앱·웹(이하 "서비스")을 이용하는 분의 개인정보를 「개인정보 보호법」에 따라 보호합니다.</p>
+
+    <h2>1. 처리하는 정보와 목적</h2>
+    <table>
+      <tr><th>항목</th><th>목적</th><th>보관</th></tr>
+      <tr><td>꿈 기록 원문(글·음성 받아쓰기 결과)</td><td>장면 나누기·읽기 글 생성</td><td>서버에 저장하지 않음. 생성 요청 처리 후 즉시 폐기. 기록은 사용자 기기(IndexedDB)에만 저장</td></tr>
+      <tr><td>음성 녹음 조각 (서버 받아쓰기 방식을 쓸 때만)</td><td>음성을 글자로 받아쓰기 (Cloudflare Workers AI Whisper)</td><td>서버에 저장하지 않음. 받아쓰기 직후 폐기. 말소리가 없는 구간은 보내지 않음</td></tr>
+      <tr><td>장면 설명·반복 인물 설명</td><td>그림 생성</td><td>서버에 저장하지 않음</td></tr>
+      <tr><td>IP 주소(접속 기록)</td><td>과도한 요청 차단(요청 횟수 제한), 보안</td><td>서버 메모리에서 최대 1시간, 이후 자동 삭제</td></tr>
+      <tr><td>신고 내용(사유, 선택 시 AI 결과)</td><td>부적절한 AI 결과 확인·개선</td><td><span class="ph">[예: 1년]</span> 후 파기. 꿈 원문은 받지 않음</td></tr>
+      <tr><td>광고 식별자(ADID) 등 기기 정보</td><td>광고 표시(Google AdMob, 안드로이드 앱)</td><td>Google 정책에 따름</td></tr>
+    </table>
+    <p>받아쓰기 방식이 「기기」이면 음성은 기기(브라우저·운영체제)의 음성 인식 기능으로 글자로 바뀌며 운영자는 음성을 받지 않습니다(기기 제조사·브라우저의 정책 적용). 「서버」 방식이면 녹음 조각이 받아쓰기를 위해 Cloudflare로 전송되고 저장되지 않습니다.</p>
+    <p>꿈 내용에는 건강·성생활 등 민감한 내용이 들어갈 수 있습니다. 서비스는 이를 저장하거나 분석·판매하지 않으며, 원하지 않는 내용은 적지 않기를 권합니다.</p>
+
+    <h2>2. 처리 위탁 및 국외 이전</h2>
+    <table>
+      <tr><th>받는 곳 / 국가</th><th>항목</th><th>목적·방법·시점</th></tr>
+      <tr><td>Google LLC / 미국 등</td><td>꿈 기록 원문</td><td>읽기 글 생성(Gemini API). 「남기기」를 누를 때 암호화 통신으로 전송</td></tr>
+      <tr><td>Cloudflare, Inc. / 미국 등</td><td>장면 설명, 반복 인물 설명, 음성 녹음 조각(서버 받아쓰기 시), IP</td><td>서버 운영, 그림 생성·받아쓰기(Workers AI). 요청 시 전송</td></tr>
+      <tr><td>Google LLC (AdMob) / 미국 등</td><td>광고 식별자, 기기 정보</td><td>광고 표시. 앱 실행 시</td></tr>
+    </table>
+    <p>국외 이전을 원하지 않으면 「남기기」·그림 기능을 쓰지 않으면 됩니다. 이 경우 읽기·그림 기능을 이용할 수 없습니다. <span class="ph">[유료 API 사용 여부에 따라 모델 학습 이용 여부 문구 확인 — Gemini 무료 등급은 제공자가 품질 개선에 사용할 수 있음]</span></p>
+
+    <h2>3. 보관과 파기</h2>
+    <p>기기에 저장된 기록은 사용자가 앱에서 「모든 기록 지우기」를 누르거나 앱을 삭제하면 사라집니다. 운영자 서버에는 꿈 기록이 남지 않습니다.</p>
+
+    <h2>4. 이용자의 권리</h2>
+    <p>열람·정정·삭제·처리정지를 요구할 수 있습니다. 서버에 저장되는 정보는 신고 내용뿐이며, 아래 연락처로 요청하면 지체 없이 처리합니다.</p>
+
+    <h2>5. 만 14세 미만</h2>
+    <p>서비스는 만 14세 미만 아동을 대상으로 하지 않습니다. <span class="ph">[Play 콘솔 대상 연령 설정과 일치시킬 것]</span></p>
+
+    <h2>6. 안전성 확보 조치</h2>
+    <p>전송 구간 암호화(HTTPS), API 키는 서버(비밀 변수)에만 보관, 요청 횟수 제한, 최소 수집.</p>
+
+    <h2>7. 개인정보 보호책임자</h2>
+    <p>이름: <span class="ph">[이름]</span> · 이메일: <span class="ph">[연락용 이메일]</span></p>
+    <p>개인정보침해신고센터(국번없이 118), 개인정보분쟁조정위원회(1833-6972)에 문의할 수 있습니다.</p>
+
+    <h2>8. 시행일</h2>
+    <p><span class="ph">[2026년 ○월 ○일]</span> (초안 작성: 2026년 11월 12일)</p>
+  </article>
+  <p class="row"><a class="btn ghost" href="./index.html" style="text-decoration:none">돌아가기</a></p>
+</body>
+</html>

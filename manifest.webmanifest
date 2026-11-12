@@ -1,0 +1,19 @@
+{
+  "name": "DearDream — 아침 꿈 기록",
+  "short_name": "DearDream",
+  "description": "아침에 말하면, 꿈이 세 장면으로 남습니다.",
+  "id": "./",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#24212f",
+  "theme_color": "#24212f",
+  "lang": "ko",
+  "categories": ["lifestyle", "health"],
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
