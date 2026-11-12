@@ -29,7 +29,7 @@
         guard
       ]);
       markUp();
-      if (!res.r.ok) throw err(res.data.code || "http", res.data.error || "HTTP " + res.r.status, res.r.status);
+      if (!res.r.ok) throw Object.assign(err(res.data.code || "http", res.data.error || "HTTP " + res.r.status, res.r.status), { retryAfter: res.r.headers.get("Retry-After") });
       return res.data;
     } catch (e) {
       if (!e.status) { markDown(); if (!e.code || e.name === "AbortError" || e.name === "TypeError") throw err(e.code === "timeout" ? "timeout" : "offline", "서버에 연결되지 않습니다."); }

@@ -215,6 +215,7 @@
     $("#unlock-box").hidden = !!e.images || offline;
     $("#img-note").hidden = !offline;
     $("#unlock-error").hidden = true;
+    setUnlockButton();
     $("#character").value = localStorage.getItem("dd.character") || "";
     $("#report").hidden = offline || !e.reading;
     show("result");
@@ -233,29 +234,56 @@
     renderResult(e);
   }
 
+  // 광고를 끝까지 본 기록: 그림 요청이 실패해도 '다시 그리기'는 광고 없이 (기록 id별, 앱 실행 중)
+  const imageCredit = new Set();
+  function imageErrorText(e) {
+    if (e.status === 429) {
+      const min = Math.max(1, Math.ceil((Number(e.retryAfter) || 600) / 60));
+      return `그림 요청이 잠시 너무 많았습니다. 약 ${min}분 뒤에 '다시 그리기'를 눌러 주세요.`;
+    }
+    if (e.code === "timeout") return "그림을 그리는 데 시간이 너무 오래 걸렸습니다. 네트워크를 확인하고 '다시 그리기'를 눌러 주세요.";
+    if (e.code === "offline" || e.code === "no_backend") return "서버에 연결되지 않아 그림을 만들지 못했습니다. 인터넷 연결을 확인하고 '다시 그리기'를 눌러 주세요.";
+    if (e.code === "empty") return "그림을 받지 못했습니다. '다시 그리기'를 눌러 주세요.";
+    return `그림을 만들지 못했습니다${e.status ? ` (서버 ${e.status})` : ""}. '다시 그리기'를 눌러 주세요.`;
+  }
+  function setUnlockButton() {
+    const btn = $("#unlock");
+    btn.disabled = false;
+    btn.textContent = current && imageCredit.has(current.id) ? "다시 그리기 (광고 없이)" : "광고 보고 그림 3장 열기";
+  }
   async function unlockImages() {
     const btn = $("#unlock"); const err = $("#unlock-error");
+    const entry = current;
     err.hidden = true;
     if (!DDAPI.configured()) { err.textContent = "그림은 서버 연결이 필요합니다."; err.hidden = false; return; }
     const character = $("#character").value.trim();
     localStorage.setItem("dd.character", character);
     btn.disabled = true;
     try {
-      const ok = await DDAds.showRewarded();
-      if (!ok) { toast("광고를 끝까지 보면 그림이 열립니다."); return; }
-      btn.textContent = "그리는 중…";
-      const prompts = current.scenes.map((s) => ({ title: s.title, body: s.body, image_prompt: s.image_prompt || "" }));
+      if (!imageCredit.has(entry.id)) {
+        btn.textContent = "광고 불러오는 중…";
+        const ad = await DDAds.showRewarded();
+        if (ad === "dismissed") { err.textContent = "광고를 끝까지 보면 그림 3장이 열립니다. 다시 눌러 주세요."; err.hidden = false; return; }
+        if (ad === "unavailable") toast("광고를 불러오지 못해 이번에는 바로 그려 드립니다.");
+        imageCredit.add(entry.id);
+      }
+      btn.textContent = "그리는 중… (10초쯤)";
+      const prompts = entry.scenes.map((s) => ({ title: s.title, body: s.body, image_prompt: s.image_prompt || "" }));
       // 반복 인물을 비워 두면 AI가 원문에서 뽑은 겉모습 설명(영어)을 써서 3장이 같은 모습이 되게
-      const out = await DDAPI.images(prompts, character || current.character || "");
-      current.images = out.images;
-      current.imageMode = out.mode;
-      await DDDB.put(current);
-      renderResult(current);
+      const out = await DDAPI.images(prompts, character || entry.character || "");
+      const imgs = Array.isArray(out.images) ? out.images : [];
+      if (!imgs.some(Boolean)) throw Object.assign(new Error("empty"), { code: "empty" });
+      entry.images = imgs;
+      entry.imageMode = out.mode;
+      imageCredit.delete(entry.id);
+      try { await DDDB.put(entry); } catch (e) { console.warn("그림 저장 실패", e && e.message); toast("그림을 기기에 저장하지 못했습니다. 저장 공간을 확인해 주세요."); }
+      if (current === entry) renderResult(entry);
+      if (imgs.some((x) => !x)) toast("그림 한두 장을 만들지 못했습니다.");
     } catch (e) {
-      err.textContent = e.status === 429 ? "오늘은 그림 요청이 많습니다. 잠시 후 다시." : (e.code === "offline" || e.code === "timeout") ? "서버에 연결되지 않아 그림을 만들지 못했습니다. 다시 시도해 주세요." : "그림을 만들지 못했습니다. 다시 시도해 주세요.";
-      err.hidden = false;
+      console.warn("그림 실패", e && (e.code || e.message), e && e.status);
+      if (current === entry) { err.textContent = imageErrorText(e); err.hidden = false; }
     } finally {
-      btn.disabled = false; btn.textContent = "광고 보고 그림 3장 열기";
+      if (current === entry) setUnlockButton();
     }
   }
 

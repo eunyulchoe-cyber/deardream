@@ -21,6 +21,6 @@
       banner: "ca-app-pub-3940256099942544/6300978111",
       rewarded: "ca-app-pub-3940256099942544/5224354917"
     },
-    APP_VERSION: "0.1.4"
+    APP_VERSION: "0.1.5"
   };
 })();
