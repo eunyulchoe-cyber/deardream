@@ -4,7 +4,7 @@
  *  - 페이지(HTML): network-first (3초 넘으면 캐시)
  *  - API(/api/*, 백엔드 도메인): 네트워크 전용. 꿈 내용은 캐시에 남기지 않음 (POST는 SW가 손대지 않음)
  *  - 새 버전: 설치 후 대기 → 앱이 "새로고침" 안내 → SKIP_WAITING 메시지로 교체 */
-const VERSION = "dd-c094b7bf14";
+const VERSION = "dd-f09955b257";
 const STATIC_CACHE = `deardream-static-${VERSION}`;
 const PAGE_CACHE = `deardream-pages-${VERSION}`;
 const PRECACHE = [
